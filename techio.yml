@@ -1,10 +1,9 @@
-title : .NET Core ASP Web Project
+title : Creating Web API in ASP.NET Core 2.0
 plan:
-  - title: ASP .NET Core on Tech.io # Set the page title (only displayed if your contribution has several pages)
+  - title: Part 1
     statement: markdowns/welcome.md # Set the file path to the page content
 #  - title: Another Page
 #    statement: markdowns/another-page.md
-
 
 # Settings for your programming projects and the associated Docker images
 projects:
@@ -14,4 +13,4 @@ projects:
     runner:
       name: microsoft/aspnetcore-build
       version: latest
-      
+
