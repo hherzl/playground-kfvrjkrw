@@ -48,7 +48,7 @@ Software
 * NodeJS
 * Visual Studio 2017 with last update
 * SQL Server
-* WideWorldImporters database
+* [`WideWorldImporters`](https://www.mssqltips.com/sqlservertip/4394/download-and-install-sql-server-2016-sample-databases-wideworldimporters-and-wideworldimportersdw/) database
 
 Skills
 
