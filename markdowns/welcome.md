@@ -31,6 +31,7 @@ The version for this API is 1.
 This is the route table for API:
 
 |Verb|Url|Description|
+|----|---|-----------|
 |GET|api/v1/Warehouse/StockItem|Retrieves stock items|
 |GET|api/v1/Warehouse/StockItem/id|Retrieves a stock item by id|
 |POST|api/v1/Warehouse/StockItem|Creates a new stock item|
