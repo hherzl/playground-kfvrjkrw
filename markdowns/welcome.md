@@ -1020,6 +1020,8 @@ Before you run Web API project, add the connection string in appsettings.json fi
 
 Now, press F5 to start debugging for Web API project, if everything it's OK, we'll get the following output in the browser:
 
+![Get Stock Items In Browser](images/007-GetStockItemsInBrowser.jpg)
+
 ### Step 07 - Add Unit Tests
 
 In order to add unit tests for API project, follow these steps:
