@@ -1031,9 +1031,15 @@ In order to add unit tests for API project, follow these steps:
     Set the name for project as WideWorldImporters.API.UnitTests
     Click OK
 
+![Add Unit Tests Project](images/010-AddUnitTestsProject.jpg)
+
 Manage references for WideWorldImporters.API.UnitTests project:
 
+![Add Reference To Api Project](images/011-AddReferenceToApiProject.jpg)
+
 Now add a reference for WideWorldImporters.API project:
+
+![Reference Manager for Unit Tests Project](images/012-ReferenceManagerForUnitTestsPrject.jpg)
 
 Once we have created the project, add the following NuGet packages for project:
 
@@ -1548,6 +1554,8 @@ Save all changes and build WideWorldImporters.API.UnitTests project.
 
 Now, check tests in test explorer:
 
+![Test Explorer For Unit Tests](images/013-TestExplorerForUnitTests.jpg)
+
 Run all tests using test explorer, if you get any error, check the error message, review code and repeat the process.
 
 ### Step 08 - Add Integration Tests
@@ -1559,9 +1567,15 @@ In order to add integration tests for API project, follow these steps:
     Set the name for project as WideWorldImporters.API.IntegrationTests
     Click OK
 
+![Add Integration Tests Project](images/014-AddIntegrationTestsProject.jpg)
+
 Manage references for WideWorldImporters.API.IntegrationTests project:
 
+![Add Reference To Api Project](images/015-AddReferenceToApiProject.jpg)
+
 Now add a reference for WideWorldImporters.API project:
+
+![Reference Manager For Integration Tests Project](images/016-ReferenceManagerForIntegrationTestsProject.jpg)
 
 Once we have created the project, add the following NuGet packages for project:
 
@@ -1874,10 +1888,13 @@ Running Integration Tests
 
 Save all changes and build WideWorldImporters.API.IntegrationTests project, test explorer will show all tests in project:
 
+![Test Explorer For Integration Tests](images/017-TestExplorerForIntegrationTests.jpg)
+
 Keep in mind: To execute integration tests, you need to have running an instance of SQL Server, the connection string in appsettings.json file will be used to establish connection with SQL Server.
 
-
 Now run all integration tests, the test explorer looks like the following image:
+
+![Execution Of Integration Tests](images/018-ExecutionOfIntegrationTests.jpg)
 
 If you get any error executing integration tests, check the error message, review code and repeat the process.
 
