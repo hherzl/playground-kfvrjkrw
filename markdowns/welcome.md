@@ -74,27 +74,27 @@ Open Visual Studio and follow these steps:
 
 In the next window, select API and the latest version for .ASP.NET Core, in this case is 2.1:
 
-![Configuration for API](images/ConfigurationForApi.jpg)
+![Configuration for API](images/002-ConfigurationForApi.jpg)
 
 Once Visual Studio has finished with creation for solution, we'll see this window:
 
-![Overview for Api](images/OverviewForApi.jpg)
+![Overview for Api](images/003-OverviewForApi.jpg)
 
 ### Step 02 - Install Nuget Packages
 
 Now, we'll proceed to install EntityFrameworkCore.SqlServer package from Nuget, right click on WideWorldImporters.API project:
 
-![Manage NuGet Packages](images/ManageNuGetPackages.jpg)
+![Manage NuGet Packages](images/004-ManageNuGetPackages.jpg)
 
 Change to Browse tab and type Microsoft.EntityFrameworkCore.SqlServer:
 
-![Install EF Core Package](images/InstallEFCorePackage.jpg)
+![Install EF Core Package](images/005-InstallEFCorePackage.jpg)
 
 This is the structure for project.
 
 Now run the project to check if solution is ready, press F5 and Visual Studio will show this browser window:
 
-![First Run](images/FirstRun.jpg)
+![First Run](images/006-FirstRun.jpg)
 
 By default, Visual Studio adds a file with name ValuesController in Controllers directory, remove it from project.
 
