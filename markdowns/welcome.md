@@ -1900,6 +1900,21 @@ If you get any error executing integration tests, check the error message, revie
 
 ## Code Challenge
 
+|Test|Description|
+|----|-----------|
+|Get stock items by parameters|Make a request for stock items searching by lastEditedBy, colorID, outerPackageID, supplierID, unitPackageID parameters.|
+|Get a non existing stock item|Get a stock item using a non existing ID and check Web API returns NotFound (404) status.|
+|Add a stock item with existing name|Add a stock item with an existing name and check Web API returns BadRequest (400) status.|
+|Add a stock item without required fields|Add a stock item without required fields and check Web API returns BadRequest (400) status.|
+|Update a non existing stock item|Update a stock item using a non existing ID and check Web API returns NotFound (404) status.|
+|Update an existing stock item without required fields|Update an existing stock item without required fields and check Web API returns BadRequest (400) status.|
+|Delete a non existing stock item|Delete a stock item using a non existing ID and check Web API returns NotFound (404) status.|
+|Delete a stock item with orders|Delete a stock item using a non existing ID and check Web API returns NotFound (404) status.|
+
+Follow the convention used in unit and integration tests to complete this challenge.
+
+Good luck!
+
 ## Code Improvements
 
 * Explain how to use command line for .NET Core
