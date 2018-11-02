@@ -1871,17 +1871,14 @@ If you get any error executing integration tests, check the error message, revie
 
 ## Code Improvements
 
-
     Explain how to use command line for .NET Core
     Add help page for Web API
     Add Security (Authentication and authorization) for API
     Split models definitions in files
     Refact models outside of Web API project
     Anything else? Let me know in the comments :)
-    
 
 ## Points of Interest
-
 
     In this article, we're working with Entity Framework Core.
     Entity Framework Core has in memory database.
@@ -1889,7 +1886,13 @@ If you get any error executing integration tests, check the error message, revie
     Unit tests perform testing for Assemblies.
     Integration tests perform testing for Http requests.
     All tests have been created with xUnit framework.
-    
+
+### Related Links
+
+*[`Unit testing C# in .NET Core using dotnet test and xUnit`](https://docs.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test?view=aspnetcore-2.1)
+* [`Integration tests in ASP.NET Core`](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1)
+
 ## History
 
+* November 1st, 2018: Initial Version
 
