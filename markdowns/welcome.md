@@ -1039,7 +1039,7 @@ Manage references for WideWorldImporters.API.UnitTests project:
 
 Now add a reference for WideWorldImporters.API project:
 
-![Reference Manager for Unit Tests Project](images/012-ReferenceManagerForUnitTestsPrject.jpg)
+![Reference Manager for Unit Tests Project](images/012-ReferenceManagerForUnitTestsProject.jpg)
 
 Once we have created the project, add the following NuGet packages for project:
 
