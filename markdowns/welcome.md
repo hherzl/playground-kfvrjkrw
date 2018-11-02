@@ -60,6 +60,22 @@ Skills
 
 For this guide, the working directory for source code is C:\Projects.
 
+### Step 01 - Create Project
+
+### Step 02 - Install Nuget Packages
+
+### Step 03 - Add Models
+
+### Step 04 - Add Controller
+
+### Step 05 - Setting Up Dependency Injection
+
+### Step 06 - Running Web API
+
+### Step 07 - Add Unit Tests
+
+### Step 08 - Add Integration Tests
+
 ## Code Challenge
 
 ## Code Improvements
