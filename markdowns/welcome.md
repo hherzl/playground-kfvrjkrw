@@ -1537,6 +1537,41 @@ Run all tests using test explorer, if you get any error, check the error message
 
 ### Step 08 - Add Integration Tests
 
+In order to add integration tests for API project, follow these steps:
+
+    Right click on Solution > Add > New Project
+    Go to Installed > Visual C# > Test > xUnit Test Project (.NET Core)
+    Set the name for project as WideWorldImporters.API.IntegrationTests
+    Click OK
+
+Manage references for WideWorldImporters.API.IntegrationTests project:
+
+Now add a reference for WideWorldImporters.API project:
+
+Once we have created the project, add the following NuGet packages for project:
+
+    Microsoft.AspNetCore.Mvc
+    Microsoft.AspNetCore.Mvc.Core
+    Microsoft.AspNetCore.Diagnostics
+    Microsoft.AspNetCore.TestHost
+    Microsoft.Extensions.Configuration.Json
+
+Remove UnitTest1.cs file.
+
+Save changes and build WideWorldImporters.API.IntegrationTests project.
+
+What is the difference between unit tests and integration tests? For unit tests, we simulate all dependencies for Web API project and for integration tests, we run a process that simulates Web API execution, this means Http requests.
+
+Now we proceed to add code related for integration tests.
+
+For this project, integration tests will perform Http requests, each Http request will perform operations to an existing database in SQL Server instance. We'll work with a local instance of SQL Server, this can change according to your working environment, I mean the scope for integration tests.
+
+ Code for TestFixture.cs file
+
+
+
+
+
 ## Code Challenge
 
 ## Code Improvements
