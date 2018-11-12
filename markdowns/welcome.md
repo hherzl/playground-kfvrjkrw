@@ -392,13 +392,6 @@ namespace WideWorldImporters.API.Models
 
     public static class RepositoryExtensions
     {
-        public static IQueryable<TEntity> Paging<TEntity>(this WideWorldImportersDbContext dbContext, int pageSize = 0, int pageNumber = 0) where TEntity : class
-        {
-            var query = dbContext.Set<TEntity>().AsQueryable();
-
-            return pageSize > 0 && pageNumber > 0 ? query.Skip((pageNumber - 1) * pageSize).Take(pageSize) : query;
-        }
-
         public static IQueryable<TModel> Paging<TModel>(this IQueryable<TModel> query, int pageSize = 0, int pageNumber = 0) where TModel : class
             => pageSize > 0 && pageNumber > 0 ? query.Skip((pageNumber - 1) * pageSize).Take(pageSize) : query;
     }
@@ -413,7 +406,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WideWorldImporters.API.Models
 {
-    public class PostStockItemsRequestModel
+    public class PostStockItemsRequest
     {
         [Key]
         public int? StockItemID { get; set; }
@@ -481,7 +474,7 @@ namespace WideWorldImporters.API.Models
         public DateTime? ValidTo { get; set; }
     }
 
-    public class PutStockItemsRequestModel
+    public class PutStockItemsRequest
     {
         [Required]
         [StringLength(200)]
@@ -498,33 +491,33 @@ namespace WideWorldImporters.API.Models
 
     public static class Extensions
     {
-        public static StockItem ToEntity(this PostStockItemsRequestModel requestModel)
+        public static StockItem ToEntity(this PostStockItemsRequest request)
             => new StockItem
             {
-                StockItemID = requestModel.StockItemID,
-                StockItemName = requestModel.StockItemName,
-                SupplierID = requestModel.SupplierID,
-                ColorID = requestModel.ColorID,
-                UnitPackageID = requestModel.UnitPackageID,
-                OuterPackageID = requestModel.OuterPackageID,
-                Brand = requestModel.Brand,
-                Size = requestModel.Size,
-                LeadTimeDays = requestModel.LeadTimeDays,
-                QuantityPerOuter = requestModel.QuantityPerOuter,
-                IsChillerStock = requestModel.IsChillerStock,
-                Barcode = requestModel.Barcode,
-                TaxRate = requestModel.TaxRate,
-                UnitPrice = requestModel.UnitPrice,
-                RecommendedRetailPrice = requestModel.RecommendedRetailPrice,
-                TypicalWeightPerUnit = requestModel.TypicalWeightPerUnit,
-                MarketingComments = requestModel.MarketingComments,
-                InternalComments = requestModel.InternalComments,
-                CustomFields = requestModel.CustomFields,
-                Tags = requestModel.Tags,
-                SearchDetails = requestModel.SearchDetails,
-                LastEditedBy = requestModel.LastEditedBy,
-                ValidFrom = requestModel.ValidFrom,
-                ValidTo = requestModel.ValidTo
+                StockItemID = request.StockItemID,
+                StockItemName = request.StockItemName,
+                SupplierID = request.SupplierID,
+                ColorID = request.ColorID,
+                UnitPackageID = request.UnitPackageID,
+                OuterPackageID = request.OuterPackageID,
+                Brand = request.Brand,
+                Size = request.Size,
+                LeadTimeDays = request.LeadTimeDays,
+                QuantityPerOuter = request.QuantityPerOuter,
+                IsChillerStock = request.IsChillerStock,
+                Barcode = request.Barcode,
+                TaxRate = request.TaxRate,
+                UnitPrice = request.UnitPrice,
+                RecommendedRetailPrice = request.RecommendedRetailPrice,
+                TypicalWeightPerUnit = request.TypicalWeightPerUnit,
+                MarketingComments = request.MarketingComments,
+                InternalComments = request.InternalComments,
+                CustomFields = request.CustomFields,
+                Tags = request.Tags,
+                SearchDetails = request.SearchDetails,
+                LastEditedBy = request.LastEditedBy,
+                ValidFrom = request.ValidFrom,
+                ValidTo = request.ValidTo
             };
     }
 }
@@ -562,7 +555,16 @@ namespace WideWorldImporters.API.Models
     {
         int ItemsCount { get; set; }
 
-        int PageCount { get; }
+        double PageCount { get; }
+    }
+
+    public class Response : IResponse
+    {
+        public string Message { get; set; }
+
+        public bool DidError { get; set; }
+
+        public string ErrorMessage { get; set; }
     }
 
     public class SingleResponse<TModel> : ISingleResponse<TModel>
@@ -603,20 +605,15 @@ namespace WideWorldImporters.API.Models
 
         public int ItemsCount { get; set; }
 
-        public int PageCount =>
-            PageSize == 0 ? 0 : ItemsCount / PageSize;
+        public double PageCount
+            => ItemsCount < PageSize ? 1 : (int)(((double)ItemsCount / PageSize) + 1);
     }
 
     public static class ResponseExtensions
     {
-        public static IActionResult ToHttpResponse<TModel>(this IListResponse<TModel> response)
+        public static IActionResult ToHttpResponse(this IResponse response)
         {
-            var status = HttpStatusCode.OK;
-
-            if (response.DidError)
-                status = HttpStatusCode.InternalServerError;
-            else if (response.Model == null)
-                status = HttpStatusCode.NoContent;
+            var status = response.DidError ? HttpStatusCode.InternalServerError : HttpStatusCode.OK;
 
             return new ObjectResult(response)
             {
@@ -632,6 +629,21 @@ namespace WideWorldImporters.API.Models
                 status = HttpStatusCode.InternalServerError;
             else if (response.Model == null)
                 status = HttpStatusCode.NotFound;
+
+            return new ObjectResult(response)
+            {
+                StatusCode = (int)status
+            };
+        }
+
+        public static IActionResult ToHttpResponse<TModel>(this IListResponse<TModel> response)
+        {
+            var status = HttpStatusCode.OK;
+
+            if (response.DidError)
+                status = HttpStatusCode.InternalServerError;
+            else if (response.Model == null)
+                status = HttpStatusCode.NoContent;
 
             return new ObjectResult(response)
             {
@@ -656,7 +668,7 @@ REPOSITORIES
 
 IRepository interface represents the model for features.
 
-IWarehouseRepository interface contains all operations related for Warehouse feature, in this guide, we're working only with Warehouse.StockItems table.
+IWarehouseRepository interface contains all operations related for Warehouse feature, in this guide, We're working only with Warehouse.StockItems table.
 
 Repository class is the abstract model for repositories.
 
@@ -668,8 +680,8 @@ REQUESTS
 
 We have the following definitions:
 
-    PostStockItemsRequestModel
-    PutStockItemsRequestModel
+    PostStockItemsRequest
+    PutStockItemsRequest
 
 PostStockItemsRequestModel represents the model to create a new stock item, contains all required properties to save in database.
 
@@ -728,7 +740,7 @@ namespace WideWorldImporters.API.Controllers
         }
 
         // GET
-        // api/v1/StockItem
+        // api/v1/Warehouse/StockItem
 
         [HttpGet("StockItem")]
         public async Task<IActionResult> GetStockItemsAsync(int pageSize = 10, int pageNumber = 1, int? lastEditedBy = null, int? colorID = null, int? outerPackageID = null, int? supplierID = null, int? unitPackageID = null)
@@ -752,6 +764,8 @@ namespace WideWorldImporters.API.Controllers
                 // Get the specific page from database
                 response.Model = await query.Paging(pageSize, pageNumber).ToListAsync();
 
+                response.Message = string.Format("Page {0} of {1}, Total of products: {2}.", pageNumber, response.PageCount, response.ItemsCount);
+
                 Logger?.LogInformation("The stock items have been retrieved successfully.");
             }
             catch (Exception ex)
@@ -766,7 +780,7 @@ namespace WideWorldImporters.API.Controllers
         }
 
         // GET
-        // api/v1/StockItem/5
+        // api/v1/Warehouse/StockItem/5
 
         [HttpGet("StockItem/{id}")]
         public async Task<IActionResult> GetStockItemAsync(int id)
@@ -792,10 +806,10 @@ namespace WideWorldImporters.API.Controllers
         }
 
         // POST
-        // api/v1/StockItem/
+        // api/v1/Warehouse/StockItem/
 
         [HttpPost("StockItem")]
-        public async Task<IActionResult> PostStockItemAsync([FromBody]PostStockItemsRequestModel requestModel)
+        public async Task<IActionResult> PostStockItemAsync([FromBody]PostStockItemsRequest request)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(PostStockItemAsync));
 
@@ -804,7 +818,7 @@ namespace WideWorldImporters.API.Controllers
             try
             {
                 var existingEntity = await Repository
-                    .GetStockItemsByStockItemNameAsync(new StockItem { StockItemName = requestModel.StockItemName });
+                    .GetStockItemsByStockItemNameAsync(new StockItem { StockItemName = request.StockItemName });
 
                 if (existingEntity != null)
                     ModelState.AddModelError("StockItemName", "Stock item name already exists");
@@ -813,7 +827,7 @@ namespace WideWorldImporters.API.Controllers
                     return BadRequest();
 
                 // Create entity from request model
-                var entity = requestModel.ToEntity();
+                var entity = request.ToEntity();
 
                 // Add entity to repository
                 Repository.Add(entity);
@@ -836,14 +850,14 @@ namespace WideWorldImporters.API.Controllers
         }
 
         // PUT
-        // api/v1/StockItem/5
+        // api/v1/Warehouse/StockItem/5
 
         [HttpPut("StockItem/{id}")]
-        public async Task<IActionResult> PutStockItemAsync(int id, [FromBody]PutStockItemsRequestModel requestModel)
+        public async Task<IActionResult> PutStockItemAsync(int id, [FromBody]PutStockItemsRequest request)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(PutStockItemAsync));
 
-            var response = new SingleResponse<StockItem>();
+            var response = new Response();
 
             try
             {
@@ -852,22 +866,19 @@ namespace WideWorldImporters.API.Controllers
 
                 // Validate if entity exists
                 if (entity == null)
-                    return response.ToHttpResponse();
+                    return NotFound();
 
                 // Set changes to entity
-                entity.StockItemName = requestModel.StockItemName;
-                entity.SupplierID = requestModel.SupplierID;
-                entity.ColorID = requestModel.ColorID;
-                entity.UnitPrice = requestModel.UnitPrice;
+                entity.StockItemName = request.StockItemName;
+                entity.SupplierID = request.SupplierID;
+                entity.ColorID = request.ColorID;
+                entity.UnitPrice = request.UnitPrice;
 
                 // Update entity in repository
                 Repository.Update(entity);
 
                 // Save entity in database
                 await Repository.CommitChangesAsync();
-
-                // Set the entity to response model
-                response.Model = entity;
             }
             catch (Exception ex)
             {
@@ -881,14 +892,14 @@ namespace WideWorldImporters.API.Controllers
         }
 
         // DELETE
-        // api/v1/StockItem/5
+        // api/v1/Warehouse/StockItem/5
 
         [HttpDelete("StockItem/{id}")]
         public async Task<IActionResult> DeleteStockItemAsync(int id)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(DeleteStockItemAsync));
 
-            var response = new SingleResponse<StockItem>();
+            var response = new Response();
 
             try
             {
@@ -897,16 +908,13 @@ namespace WideWorldImporters.API.Controllers
 
                 // Validate if entity exists
                 if (entity == null)
-                    return response.ToHttpResponse();
+                    return NotFound();
 
                 // Remove entity from repository
                 Repository.Remove(entity);
 
                 // Delete entity in database
                 await Repository.CommitChangesAsync();
-
-                // Set the entity to response model
-                response.Model = entity;
             }
             catch (Exception ex)
             {
@@ -920,7 +928,6 @@ namespace WideWorldImporters.API.Controllers
         }
     }
 }
-
 ```
 
 The process for all controller's actions is:
@@ -1056,7 +1063,7 @@ What is TDD? Testing is a common practice in nowadays, because with unit tests, 
 
 Another concept in TDD is AAA: Arrange, Act and Assert; Arrange is the block for creation of objects, Act is the block to place all invocations for methods and Assert is the block to validate the results from methods invocation.
 
-Since we're working with In memory database for unit tests, we need to create a class to mock WideWorldImportersDbContext class and also add data to perform testing for IWarehouseRepository operations.
+Since We're working with In memory database for unit tests, we need to create a class to mock WideWorldImportersDbContext class and also add data to perform testing for IWarehouseRepository operations.
 
 To be clear: these unit tests do not establish a connection with SQL Server.
 
@@ -1439,7 +1446,7 @@ namespace WideWorldImporters.API.UnitTests
             // Arrange
             var repository = RepositoryMocker.GetWarehouseRepository(nameof(TestPostStockItemAsync));
             var controller = new WarehouseController(null, repository);
-            var requestModel = new PostStockItemsRequestModel
+            var requestModel = new PostStockItemsRequest
             {
                 StockItemID = 100,
                 StockItemName = "USB anime flash drive - Goku",
@@ -1478,7 +1485,7 @@ namespace WideWorldImporters.API.UnitTests
             var repository = RepositoryMocker.GetWarehouseRepository(nameof(TestPutStockItemAsync));
             var controller = new WarehouseController(null, repository);
             var id = 12;
-            var requestModel = new PutStockItemsRequestModel
+            var requestModel = new PutStockItemsRequest
             {
                 StockItemName = "USB food flash drive (Update)",
                 SupplierID = 12,
@@ -1487,7 +1494,7 @@ namespace WideWorldImporters.API.UnitTests
 
             // Act
             var response = await controller.PutStockItemAsync(id, requestModel) as ObjectResult;
-            var value = response.Value as ISingleResponse<StockItem>;
+            var value = response.Value as IResponse;
 
             repository.Dispose();
 
@@ -1505,7 +1512,7 @@ namespace WideWorldImporters.API.UnitTests
 
             // Act
             var response = await controller.DeleteStockItemAsync(id) as ObjectResult;
-            var value = response.Value as ISingleResponse<StockItem>;
+            var value = response.Value as IResponse;
 
             repository.Dispose();
 
@@ -1514,7 +1521,6 @@ namespace WideWorldImporters.API.UnitTests
         }
     }
 }
-
 ```
 
 As we can see, WarehouseControllerUnitTest contains all tests for Web API, these are the methods:
@@ -1739,7 +1745,6 @@ namespace WideWorldImporters.API.IntegrationTests
 
             // Act
             var response = await Client.GetAsync(request);
-            var value = await response.Content.ReadAsStringAsync();
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -1753,7 +1758,6 @@ namespace WideWorldImporters.API.IntegrationTests
 
             // Act
             var response = await Client.GetAsync(request);
-            var value = await response.Content.ReadAsStringAsync();
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -1808,7 +1812,6 @@ namespace WideWorldImporters.API.IntegrationTests
 
             // Act
             var response = await Client.PutAsync(requestUrl, ContentHelper.GetStringContent(requestModel));
-            var value = await response.Content.ReadAsStringAsync();
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -1850,12 +1853,13 @@ namespace WideWorldImporters.API.IntegrationTests
 
             // Assert
             postResponse.EnsureSuccessStatusCode();
+
             Assert.False(singleResponse.DidError);
+
             deleteResponse.EnsureSuccessStatusCode();
         }
     }
 }
-
 ```
 
 As we can see, WarehouseTests contain all tests for Web API, these are the methods:
@@ -1926,7 +1930,7 @@ Good luck!
 
 ## Points of Interest
 
-* In this article, we're working with Entity Framework Core.
+* In this article, We're working with Entity Framework Core.
 * Entity Framework Core has in memory database.
 * We can adjust all repositories to expose specific operations, in some cases, we don't want to have GetAll, Add, Update or Delete operations.
 * Unit tests perform testing for Assemblies.
