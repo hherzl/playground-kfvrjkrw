@@ -103,13 +103,13 @@ By default, Visual Studio adds a file with name ValuesController in Controllers 
 Now, create a directory with name Models and add the following files:
 
     Entities.cs
-    Repositories.cs
+    Extensions.cs
     Requests.cs
     Responses.cs
 
 Entities.cs will contains all code related to Entity Framework Core.
 
-Repositories.cs will contain the implementation for repositories.
+Extensions.cs will contain the extension methods for DbContext.
 
 Requests.cs will contain definitions for request models.
 
@@ -257,6 +257,7 @@ namespace WideWorldImporters.API.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Apply configurations for entity
+
             modelBuilder
                 .ApplyConfiguration(new StockItemsConfiguration());
 
@@ -268,97 +269,21 @@ namespace WideWorldImporters.API.Models
 }
 ```
 
-Code for Repositories.cs file:
+Code for Extensions.cs file:
 
 ```csharp
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace WideWorldImporters.API.Models
 {
-    public interface IRepository : IDisposable
+    public static class WideWorldImportersDbContextExtensions
     {
-        void Add<TEntity>(TEntity entity) where TEntity : class;
-
-        void Update<TEntity>(TEntity entity) where TEntity : class;
-
-        void Remove<TEntity>(TEntity entity) where TEntity : class;
-
-        int CommitChanges();
-
-        Task<int> CommitChangesAsync();
-    }
-
-    public interface IWarehouseRepository : IRepository
-    {
-        IQueryable<StockItem> GetStockItems(int pageSize = 10, int pageNumber = 1, int? lastEditedBy = null, int? colorID = null, int? outerPackageID = null, int? supplierID = null, int? unitPackageID = null);
-
-        Task<StockItem> GetStockItemsAsync(StockItem entity);
-
-        Task<StockItem> GetStockItemsByStockItemNameAsync(StockItem entity);
-    }
-
-    public class Repository
-    {
-        protected bool Disposed;
-        protected WideWorldImportersDbContext DbContext;
-
-        public Repository(WideWorldImportersDbContext dbContext)
-        {
-            DbContext = dbContext;
-        }
-
-        public void Dispose()
-        {
-            if (!Disposed)
-            {
-                DbContext?.Dispose();
-
-                Disposed = true;
-            }
-        }
-
-        public virtual void Add<TEntity>(TEntity entity) where TEntity : class
-        {
-            // todo: Add code related to addition of entity before to commit changes in database
-
-            DbContext.Add(entity);
-        }
-
-        public virtual void Update<TEntity>(TEntity entity) where TEntity : class
-        {
-            // todo: Add code related to update entity before to commit changes in database
-
-            DbContext.Update(entity);
-        }
-
-        public virtual void Remove<TEntity>(TEntity entity) where TEntity : class
-        {
-            // todo: Add code related to remove entity before to commit changes in database
-
-            DbContext.Remove(entity);
-        }
-
-        public int CommitChanges()
-            => DbContext.SaveChanges();
-
-        public Task<int> CommitChangesAsync()
-            => DbContext.SaveChangesAsync();
-    }
-
-    public class WarehouseRepository : Repository, IWarehouseRepository
-    {
-        public WarehouseRepository(WideWorldImportersDbContext dbContext)
-            : base(dbContext)
-        {
-        }
-
-        public IQueryable<StockItem> GetStockItems(int pageSize = 10, int pageNumber = 1, int? lastEditedBy = null, int? colorID = null, int? outerPackageID = null, int? supplierID = null, int? unitPackageID = null)
+        public static IQueryable<StockItem> GetStockItems(this WideWorldImportersDbContext dbContext, int pageSize = 10, int pageNumber = 1, int? lastEditedBy = null, int? colorID = null, int? outerPackageID = null, int? supplierID = null, int? unitPackageID = null)
         {
             // Get query from DbSet
-            var query = DbContext.StockItems.AsQueryable();
+            var query = dbContext.StockItems.AsQueryable();
 
             // Filter by: 'LastEditedBy'
             if (lastEditedBy.HasValue)
@@ -383,14 +308,14 @@ namespace WideWorldImporters.API.Models
             return query;
         }
 
-        public async Task<StockItem> GetStockItemsAsync(StockItem entity)
-            => await DbContext.StockItems.FirstOrDefaultAsync(item => item.StockItemID == entity.StockItemID);
+        public static async Task<StockItem> GetStockItemsAsync(this WideWorldImportersDbContext dbContext, StockItem entity)
+            => await dbContext.StockItems.FirstOrDefaultAsync(item => item.StockItemID == entity.StockItemID);
 
-        public async Task<StockItem> GetStockItemsByStockItemNameAsync(StockItem entity)
-            => await DbContext.StockItems.FirstOrDefaultAsync(item => item.StockItemName == entity.StockItemName);
+        public static async Task<StockItem> GetStockItemsByStockItemNameAsync(this WideWorldImportersDbContext dbContext, StockItem entity)
+            => await dbContext.StockItems.FirstOrDefaultAsync(item => item.StockItemName == entity.StockItemName);
     }
 
-    public static class RepositoryExtensions
+    public static class IQueryableExtensions
     {
         public static IQueryable<TModel> Paging<TModel>(this IQueryable<TModel> query, int pageSize = 0, int pageNumber = 0) where TModel : class
             => pageSize > 0 && pageNumber > 0 ? query.Skip((pageNumber - 1) * pageSize).Take(pageSize) : query;
@@ -664,17 +589,11 @@ StockItemsConfiguration class contains the mapping for StockItems class.
 
 WideWorldImportersDbContext class is the link between database and C# code, this class handles queries and commits the changes in database and of course, another things.
 
-REPOSITORIES
+EXTENSIONS
 
-IRepository interface represents the model for features.
+WideWorldImportersDbContextExtensions contains extension methods to provide linq queries.
 
-IWarehouseRepository interface contains all operations related for Warehouse feature, in this guide, We're working only with Warehouse.StockItems table.
-
-Repository class is the abstract model for repositories.
-
-WarehouseRepository contains all implementations for Warehouse feature.
-
-RepositoryExtensions contains extension methods to allow paging in repositories.
+IQueryableExtensions contains extension methods to allow paging in IQueryable<TEntity> instances.
 
 REQUESTS
 
@@ -731,12 +650,12 @@ namespace WideWorldImporters.API.Controllers
     public class WarehouseController : ControllerBase
     {
         protected readonly ILogger Logger;
-        protected readonly IWarehouseRepository Repository;
+        protected readonly WideWorldImportersDbContext DbContext;
 
-        public WarehouseController(ILogger<WarehouseController> logger, IWarehouseRepository repository)
+        public WarehouseController(ILogger<WarehouseController> logger, WideWorldImportersDbContext dbContext)
         {
             Logger = logger;
-            Repository = repository;
+            DbContext = dbContext;
         }
 
         // GET
@@ -751,8 +670,8 @@ namespace WideWorldImporters.API.Controllers
 
             try
             {
-                // Get the "proposed" query from repository
-                var query = Repository.GetStockItems();
+                // Get the "proposed" query from DbContext
+                var query = DbContext.GetStockItems();
 
                 // Set paging values
                 response.PageSize = pageSize;
@@ -792,7 +711,7 @@ namespace WideWorldImporters.API.Controllers
             try
             {
                 // Get the stock item by id
-                response.Model = await Repository.GetStockItemsAsync(new StockItem(id));
+                response.Model = await DbContext.GetStockItemsAsync(new StockItem(id));
             }
             catch (Exception ex)
             {
@@ -817,7 +736,7 @@ namespace WideWorldImporters.API.Controllers
 
             try
             {
-                var existingEntity = await Repository
+                var existingEntity = await DbContext
                     .GetStockItemsByStockItemNameAsync(new StockItem { StockItemName = request.StockItemName });
 
                 if (existingEntity != null)
@@ -829,11 +748,11 @@ namespace WideWorldImporters.API.Controllers
                 // Create entity from request model
                 var entity = request.ToEntity();
 
-                // Add entity to repository
-                Repository.Add(entity);
+                // Add entity to DbContext
+                DbContext.Add(entity);
 
                 // Save entity in database
-                await Repository.CommitChangesAsync();
+                await DbContext.SaveChangesAsync();
 
                 // Set the entity to response model
                 response.Model = entity;
@@ -862,7 +781,7 @@ namespace WideWorldImporters.API.Controllers
             try
             {
                 // Get stock item by id
-                var entity = await Repository.GetStockItemsAsync(new StockItem(id));
+                var entity = await DbContext.GetStockItemsAsync(new StockItem(id));
 
                 // Validate if entity exists
                 if (entity == null)
@@ -874,11 +793,11 @@ namespace WideWorldImporters.API.Controllers
                 entity.ColorID = request.ColorID;
                 entity.UnitPrice = request.UnitPrice;
 
-                // Update entity in repository
-                Repository.Update(entity);
+                // Update entity in DbContext
+                DbContext.Update(entity);
 
                 // Save entity in database
-                await Repository.CommitChangesAsync();
+                await DbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -904,17 +823,17 @@ namespace WideWorldImporters.API.Controllers
             try
             {
                 // Get stock item by id
-                var entity = await Repository.GetStockItemsAsync(new StockItem(id));
+                var entity = await DbContext.GetStockItemsAsync(new StockItem(id));
 
                 // Validate if entity exists
                 if (entity == null)
                     return NotFound();
 
-                // Remove entity from repository
-                Repository.Remove(entity);
+                // Remove entity from DbContext
+                DbContext.Remove(entity);
 
                 // Delete entity in database
-                await Repository.CommitChangesAsync();
+                await DbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -934,8 +853,8 @@ The process for all controller's actions is:
 
     Log the invocation for method.
     Create the instance for response according to action (Paged, list or single).
-    Perform access to database through repository instance.
-    If invocation for repository fails, set DidError property as true and set ErrorMessage property with: There was an internal error, please contact to technical support., because it isn't recommended to expose error details in response, it's better to save all exception details in log file.
+    Perform access to database through DbContext instance.
+    If invocation for DbContext extension method fails, set DidError property as true and set ErrorMessage property with: There was an internal error, please contact to technical support., because it isn't recommended to expose error details in response, it's better to save all exception details in log file.
     Return result as Http response.
 
 Keep in mind all names for methods that end with Async sufix because all operations are async but in Http attributes, we don't use this suffix.
@@ -986,9 +905,6 @@ namespace WideWorldImporters.API
 
             // Set up dependency injection for controller's logger
             services.AddScoped<ILogger, Logger<WarehouseController>>();
-
-            // Set up dependency injection for repository
-            services.AddScoped<IWarehouseRepository, WarehouseRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -1063,44 +979,15 @@ What is TDD? Testing is a common practice in nowadays, because with unit tests, 
 
 Another concept in TDD is AAA: Arrange, Act and Assert; Arrange is the block for creation of objects, Act is the block to place all invocations for methods and Assert is the block to validate the results from methods invocation.
 
-Since We're working with In memory database for unit tests, we need to create a class to mock WideWorldImportersDbContext class and also add data to perform testing for IWarehouseRepository operations.
+Since We're working with In memory database for unit tests, We need to create a class to mock WideWorldImportersDbContext class and also add data to perform testing for WideWorldImportersDbContext extension methods.
 
 To be clear: these unit tests do not establish a connection with SQL Server.
 
 For unit tests, add the following files:
 
     DbContextExtensions.cs
-    RepositoryMocker.cs
+    DbContextMocker.cs
     WarehouseControllerUnitTest.cs
-
-Code for RepositoryMocker.cs file:
-
-```csharp
-using Microsoft.EntityFrameworkCore;
-using WideWorldImporters.API.Models;
-
-namespace WideWorldImporters.API.UnitTests
-{
-    public static class RepositoryMocker
-    {
-        public static IWarehouseRepository GetWarehouseRepository(string dbName)
-        {
-            // Create options for DbContext instance
-            var options = new DbContextOptionsBuilder<WideWorldImportersDbContext>()
-                .UseInMemoryDatabase(databaseName: dbName)
-                .Options;
-
-            // Create instance of DbContext
-            var dbContext = new WideWorldImportersDbContext(options);
-
-            // Add entities in memory
-            dbContext.Seed();
-
-            return new WarehouseRepository(dbContext);
-        }
-    }
-}
-```
 
 Code for DbContextExtensions.cs file:
 
@@ -1391,6 +1278,35 @@ namespace WideWorldImporters.API.UnitTests
 }
 ```
 
+Code for DbContextMocker.cs file:
+
+```csharp
+using Microsoft.EntityFrameworkCore;
+using WideWorldImporters.API.Models;
+
+namespace WideWorldImporters.API.UnitTests
+{
+    public static class DbContextMocker
+    {
+        public static WideWorldImportersDbContext GetWideWorldImportersDbContext(string dbName)
+        {
+            // Create options for DbContext instance
+            var options = new DbContextOptionsBuilder<WideWorldImportersDbContext>()
+                .UseInMemoryDatabase(databaseName: dbName)
+                .Options;
+
+            // Create instance of DbContext
+            var dbContext = new WideWorldImportersDbContext(options);
+
+            // Add entities in memory
+            dbContext.Seed();
+
+            return dbContext;
+        }
+    }
+}
+```
+
 Code for WarehouseControllerUnitTest.cs file:
 
 ```csharp
@@ -1409,14 +1325,14 @@ namespace WideWorldImporters.API.UnitTests
         public async Task TestGetStockItemsAsync()
         {
             // Arrange
-            var repository = RepositoryMocker.GetWarehouseRepository(nameof(TestGetStockItemsAsync));
-            var controller = new WarehouseController(null, repository);
+            var dbContext = DbContextMocker.GetWideWorldImportersDbContext(nameof(TestGetStockItemsAsync));
+            var controller = new WarehouseController(null, dbContext);
 
             // Act
             var response = await controller.GetStockItemsAsync() as ObjectResult;
             var value = response.Value as IPagedResponse<StockItem>;
 
-            repository.Dispose();
+            dbContext.Dispose();
 
             // Assert
             Assert.False(value.DidError);
@@ -1426,15 +1342,15 @@ namespace WideWorldImporters.API.UnitTests
         public async Task TestGetStockItemAsync()
         {
             // Arrange
-            var repository = RepositoryMocker.GetWarehouseRepository(nameof(TestGetStockItemAsync));
-            var controller = new WarehouseController(null, repository);
+            var dbContext = DbContextMocker.GetWideWorldImportersDbContext(nameof(TestGetStockItemAsync));
+            var controller = new WarehouseController(null, dbContext);
             var id = 1;
 
             // Act
             var response = await controller.GetStockItemAsync(id) as ObjectResult;
             var value = response.Value as ISingleResponse<StockItem>;
 
-            repository.Dispose();
+            dbContext.Dispose();
 
             // Assert
             Assert.False(value.DidError);
@@ -1444,8 +1360,8 @@ namespace WideWorldImporters.API.UnitTests
         public async Task TestPostStockItemAsync()
         {
             // Arrange
-            var repository = RepositoryMocker.GetWarehouseRepository(nameof(TestPostStockItemAsync));
-            var controller = new WarehouseController(null, repository);
+            var dbContext = DbContextMocker.GetWideWorldImportersDbContext(nameof(TestPostStockItemAsync));
+            var controller = new WarehouseController(null, dbContext);
             var requestModel = new PostStockItemsRequest
             {
                 StockItemID = 100,
@@ -1472,7 +1388,7 @@ namespace WideWorldImporters.API.UnitTests
             var response = await controller.PostStockItemAsync(requestModel) as ObjectResult;
             var value = response.Value as ISingleResponse<StockItem>;
 
-            repository.Dispose();
+            dbContext.Dispose();
 
             // Assert
             Assert.False(value.DidError);
@@ -1482,8 +1398,8 @@ namespace WideWorldImporters.API.UnitTests
         public async Task TestPutStockItemAsync()
         {
             // Arrange
-            var repository = RepositoryMocker.GetWarehouseRepository(nameof(TestPutStockItemAsync));
-            var controller = new WarehouseController(null, repository);
+            var dbContext = DbContextMocker.GetWideWorldImportersDbContext(nameof(TestPutStockItemAsync));
+            var controller = new WarehouseController(null, dbContext);
             var id = 12;
             var requestModel = new PutStockItemsRequest
             {
@@ -1496,7 +1412,7 @@ namespace WideWorldImporters.API.UnitTests
             var response = await controller.PutStockItemAsync(id, requestModel) as ObjectResult;
             var value = response.Value as IResponse;
 
-            repository.Dispose();
+            dbContext.Dispose();
 
             // Assert
             Assert.False(value.DidError);
@@ -1506,15 +1422,15 @@ namespace WideWorldImporters.API.UnitTests
         public async Task TestDeleteStockItemAsync()
         {
             // Arrange
-            var repository = RepositoryMocker.GetWarehouseRepository(nameof(TestDeleteStockItemAsync));
-            var controller = new WarehouseController(null, repository);
+            var dbContext = DbContextMocker.GetWideWorldImportersDbContext(nameof(TestDeleteStockItemAsync));
+            var controller = new WarehouseController(null, dbContext);
             var id = 5;
 
             // Act
             var response = await controller.DeleteStockItemAsync(id) as ObjectResult;
             var value = response.Value as IResponse;
 
-            repository.Dispose();
+            dbContext.Dispose();
 
             // Assert
             Assert.False(value.DidError);
@@ -1523,7 +1439,7 @@ namespace WideWorldImporters.API.UnitTests
 }
 ```
 
-As we can see, WarehouseControllerUnitTest contains all tests for Web API, these are the methods:
+As We can see, WarehouseControllerUnitTest contains all tests for Web API, these are the methods:
 
 |Method|Description|
 |------|-----------|
@@ -1535,7 +1451,7 @@ As we can see, WarehouseControllerUnitTest contains all tests for Web API, these
 
 How Unit Tests Work?
 
-RepositoryMocker creates an instance of WideWorldImportersDbContext using in memory database, the dbName parameter sets the name for in memory database; then there is an invocation for Seed method, this method adds entities for WideWorldImportersDbContext instance in order to provide results.
+DbContextMocker creates an instance of WideWorldImportersDbContext using in memory database, the dbName parameter sets the name for in memory database; then there is an invocation for Seed method, this method adds entities for WideWorldImportersDbContext instance in order to provide results.
 
 DbContextExtensions class contains Seed extension method.
 
@@ -1547,11 +1463,11 @@ At this level (Unit tests), we only need to check the operations for repositorie
 
 The process for unit tests is:
 
-    Create an instance of repository
+    Create an instance of DbContext
     Create an instance of controller
     Invoke controller's method
     Get value from controller's invocation
-    Dispose repository instance
+    Dispose DbContext instance
     Validate response
 
 Running Unit Tests
@@ -1945,3 +1861,4 @@ Good luck!
 ## History
 
 * November 1st, 2018: Initial Version
+* November 27th, 2018: Removing Repository Pattern
