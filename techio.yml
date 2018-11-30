@@ -2,9 +2,9 @@ title : Creating Web API in ASP.NET Core 2.0
 plan:
   - title: Part 1
     statement: markdowns/welcome.md
-  - title: Part 2
+  - title: Part 2 - Unit Tests
     statement: markdowns/unit-tests.md
-  - title: Part 3
+  - title: Part 3 - Integration Tests
     statement: markdowns/integration-tests.md
 
 # Settings for your programming projects and the associated Docker images

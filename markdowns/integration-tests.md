@@ -1,6 +1,6 @@
 # Creating Web API in ASP.NET Core 2.0
 
-## Integration Tests
+## Part 3 - Integration Tests
 
 ### Step 08 - Add Integration Tests
 
