@@ -1,6 +1,6 @@
 title : Creating Web API in ASP.NET Core 2.0
 plan:
-  - title: Part 1
+  - title: Part 1 - Web API
     statement: markdowns/welcome.md
   - title: Part 2 - Unit Tests
     statement: markdowns/unit-tests.md
