@@ -945,6 +945,10 @@ Now, press F5 to start debugging for Web API project, if everything it's OK, we'
 
 ![Get Stock Items In Browser](images/007-GetStockItemsInBrowser.jpg)
 
+## Related Links
+
+* [`Tutorials for ASP.NET Web API (Courtesy of Jennifer Cai)`](https://docs.microsoft.com/en-us/aspnet/web-api/)
+
 ## Code Improvements
 
 * Explain how to use command line for .NET Core
