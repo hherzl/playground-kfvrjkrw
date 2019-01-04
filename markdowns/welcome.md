@@ -947,7 +947,7 @@ Now, press F5 to start debugging for Web API project, if everything it's OK, we'
 
 ## Related Links
 
-* [`Tutorials for ASP.NET Web API (Courtesy of Jennifer Cai)`](https://docs.microsoft.com/en-us/aspnet/web-api/)
+* [`Tutorials for ASP.NET Web API`](https://docs.microsoft.com/en-us/aspnet/web-api/) (Courtesy of Jennifer Cai)
 
 ## Code Improvements
 
