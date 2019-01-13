@@ -70,31 +70,40 @@ Open Visual Studio and follow these steps:
     Set the name for project as WideWorldImporters.API
     Click OK
 
-![Create Project](images/001-CreateProject.jpg)
+![`Create Project`](images/001-CreateProject.jpg)
 
 In the next window, select API and the latest version for .ASP.NET Core, in this case is 2.1:
 
-![Configuration for API](images/002-ConfigurationForApi.jpg)
+![`Configuration for API`](images/002-ConfigurationForApi.jpg)
 
 Once Visual Studio has finished with creation for solution, we'll see this window:
 
-![Overview for Api](images/003-OverviewForApi.jpg)
+![`Overview for Api`](images/003-OverviewForApi.jpg)
 
 ### Step 02 - Install Nuget Packages
 
+In this step, We need to install the following NuGet packages:
+
+	* EntityFrameworkCore.SqlServer
+	* Swashbuckle.AspNetCore
+
 Now, we'll proceed to install EntityFrameworkCore.SqlServer package from Nuget, right click on WideWorldImporters.API project:
 
-![Manage NuGet Packages](images/004-ManageNuGetPackages.jpg)
+![`Manage NuGet Packages`](images/004-ManageNuGetPackages.jpg)
 
 Change to Browse tab and type Microsoft.EntityFrameworkCore.SqlServer:
 
-![Install EF Core Package](images/005-InstallEFCorePackage.jpg)
+![`Install EF Core Package`](images/005-InstallEFCorePackage.jpg)
+
+Next, install Swashbuckle.AspNetCore package:
+
+![`Install Swashbuckle Package`](images/005-InstallSwashbucklePackage.jpg)
 
 This is the structure for project.
 
 Now run the project to check if solution is ready, press F5 and Visual Studio will show this browser window:
 
-![First Run](images/006-FirstRun.jpg)
+![`First Run`](images/006-FirstRun.jpg)
 
 By default, Visual Studio adds a file with name ValuesController in Controllers directory, remove it from project.
 
@@ -124,6 +133,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace WideWorldImporters.API.Models
 {
+#pragma warning disable CS1591
     public partial class StockItem
     {
         public StockItem()
@@ -195,11 +205,6 @@ namespace WideWorldImporters.API.Models
             builder.HasKey(p => p.StockItemID);
 
             // Set configuration for columns
-            builder
-                .Property(p => p.StockItemID)
-                .HasColumnType("int")
-                .IsRequired()
-                .HasComputedColumnSql("NEXT VALUE FOR [Sequences].[StockItemID]");
 
             builder.Property(p => p.StockItemName).HasColumnType("nvarchar(200)").IsRequired();
             builder.Property(p => p.SupplierID).HasColumnType("int").IsRequired();
@@ -219,6 +224,15 @@ namespace WideWorldImporters.API.Models
             builder.Property(p => p.MarketingComments).HasColumnType("nvarchar(max)");
             builder.Property(p => p.InternalComments).HasColumnType("nvarchar(max)");
             builder.Property(p => p.CustomFields).HasColumnType("nvarchar(max)");
+            builder.Property(p => p.LastEditedBy).HasColumnType("int").IsRequired();
+
+            // Computed columns
+
+            builder
+                .Property(p => p.StockItemID)
+                .HasColumnType("int")
+                .IsRequired()
+                .HasComputedColumnSql("NEXT VALUE FOR [Sequences].[StockItemID]");
 
             builder
                 .Property(p => p.Tags)
@@ -231,7 +245,7 @@ namespace WideWorldImporters.API.Models
                 .IsRequired()
                 .HasComputedColumnSql("concat([StockItemName],N' ',[MarketingComments])");
 
-            builder.Property(p => p.LastEditedBy).HasColumnType("int").IsRequired();
+            // Columns with generated value on add or update
 
             builder
                 .Property(p => p.ValidFrom)
@@ -266,6 +280,7 @@ namespace WideWorldImporters.API.Models
 
         public DbSet<StockItem> StockItems { get; set; }
     }
+#pragma warning restore CS1591
 }
 ```
 
@@ -278,6 +293,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WideWorldImporters.API.Models
 {
+#pragma warning disable CS1591
     public static class WideWorldImportersDbContextExtensions
     {
         public static IQueryable<StockItem> GetStockItems(this WideWorldImportersDbContext dbContext, int pageSize = 10, int pageNumber = 1, int? lastEditedBy = null, int? colorID = null, int? outerPackageID = null, int? supplierID = null, int? unitPackageID = null)
@@ -320,6 +336,7 @@ namespace WideWorldImporters.API.Models
         public static IQueryable<TModel> Paging<TModel>(this IQueryable<TModel> query, int pageSize = 0, int pageNumber = 0) where TModel : class
             => pageSize > 0 && pageNumber > 0 ? query.Skip((pageNumber - 1) * pageSize).Take(pageSize) : query;
     }
+#pragma warning restore CS1591
 }
 ```
 
@@ -331,6 +348,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WideWorldImporters.API.Models
 {
+#pragma warning disable CS1591
     public class PostStockItemsRequest
     {
         [Key]
@@ -445,6 +463,7 @@ namespace WideWorldImporters.API.Models
                 ValidTo = request.ValidTo
             };
     }
+#pragma warning restore CS1591
 }
 ```
 
@@ -457,6 +476,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WideWorldImporters.API.Models
 {
+#pragma warning disable CS1591
     public interface IResponse
     {
         string Message { get; set; }
@@ -576,6 +596,7 @@ namespace WideWorldImporters.API.Models
             };
         }
     }
+#pragma warning restore CS1591
 }
 ```
 
@@ -645,6 +666,7 @@ using WideWorldImporters.API.Models;
 
 namespace WideWorldImporters.API.Controllers
 {
+#pragma warning disable CS1591
     [ApiController]
     [Route("api/v1/[controller]")]
     public class WarehouseController : ControllerBase
@@ -657,11 +679,27 @@ namespace WideWorldImporters.API.Controllers
             Logger = logger;
             DbContext = dbContext;
         }
+#pragma warning restore CS1591
 
         // GET
         // api/v1/Warehouse/StockItem
 
+        /// <summary>
+        /// Retrieves stock items
+        /// </summary>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="pageNumber">Page number</param>
+        /// <param name="lastEditedBy">Last edit by (user id)</param>
+        /// <param name="colorID">Color id</param>
+        /// <param name="outerPackageID">Outer package id</param>
+        /// <param name="supplierID">Supplier id</param>
+        /// <param name="unitPackageID">Unit package id</param>
+        /// <returns>A response with stock items list</returns>
+        /// <response code="200">Returns the stock items list</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpGet("StockItem")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetStockItemsAsync(int pageSize = 10, int pageNumber = 1, int? lastEditedBy = null, int? colorID = null, int? outerPackageID = null, int? supplierID = null, int? unitPackageID = null)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetStockItemsAsync));
@@ -670,7 +708,7 @@ namespace WideWorldImporters.API.Controllers
 
             try
             {
-                // Get the "proposed" query from DbContext
+                // Get the "proposed" query from repository
                 var query = DbContext.GetStockItems();
 
                 // Set paging values
@@ -701,7 +739,18 @@ namespace WideWorldImporters.API.Controllers
         // GET
         // api/v1/Warehouse/StockItem/5
 
+        /// <summary>
+        /// Retrieves a stock item by ID
+        /// </summary>
+        /// <param name="id">Stock item id</param>
+        /// <returns>A response with stock item</returns>
+        /// <response code="200">Returns the stock items list</response>
+        /// <response code="404">If stock item is not exists</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpGet("StockItem/{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetStockItemAsync(int id)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetStockItemAsync));
@@ -727,7 +776,20 @@ namespace WideWorldImporters.API.Controllers
         // POST
         // api/v1/Warehouse/StockItem/
 
+        /// <summary>
+        /// Creates a new stock item
+        /// </summary>
+        /// <param name="request">Request model</param>
+        /// <returns>A response with new stock item</returns>
+        /// <response code="200">Returns the stock items list</response>
+        /// <response code="201">A response as creation of stock item</response>
+        /// <response code="400">For bad request</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpPost("StockItem")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> PostStockItemAsync([FromBody]PostStockItemsRequest request)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(PostStockItemAsync));
@@ -748,7 +810,7 @@ namespace WideWorldImporters.API.Controllers
                 // Create entity from request model
                 var entity = request.ToEntity();
 
-                // Add entity to DbContext
+                // Add entity to repository
                 DbContext.Add(entity);
 
                 // Save entity in database
@@ -771,7 +833,19 @@ namespace WideWorldImporters.API.Controllers
         // PUT
         // api/v1/Warehouse/StockItem/5
 
+        /// <summary>
+        /// Updates an existing stock item
+        /// </summary>
+        /// <param name="id">Stock item ID</param>
+        /// <param name="request">Request model</param>
+        /// <returns>A response as update stock item result</returns>
+        /// <response code="200">If stock item was updated successfully</response>
+        /// <response code="400">For bad request</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpPut("StockItem/{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> PutStockItemAsync(int id, [FromBody]PutStockItemsRequest request)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(PutStockItemAsync));
@@ -793,7 +867,7 @@ namespace WideWorldImporters.API.Controllers
                 entity.ColorID = request.ColorID;
                 entity.UnitPrice = request.UnitPrice;
 
-                // Update entity in DbContext
+                // Update entity in repository
                 DbContext.Update(entity);
 
                 // Save entity in database
@@ -813,7 +887,16 @@ namespace WideWorldImporters.API.Controllers
         // DELETE
         // api/v1/Warehouse/StockItem/5
 
+        /// <summary>
+        /// Deletes an existing stock item
+        /// </summary>
+        /// <param name="id">Stock item ID</param>
+        /// <returns>A response as delete stock item result</returns>
+        /// <response code="200">If stock item was deleted successfully</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpDelete("StockItem/{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> DeleteStockItemAsync(int id)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(DeleteStockItemAsync));
@@ -829,7 +912,7 @@ namespace WideWorldImporters.API.Controllers
                 if (entity == null)
                     return NotFound();
 
-                // Remove entity from DbContext
+                // Remove entity from repository
                 DbContext.Remove(entity);
 
                 // Delete entity in database
@@ -870,6 +953,9 @@ Project template for ASP.NET Core has a class with name Startup, in this class w
 Modify the code of Startup.cs file to look like this:
 
 ```csharp
+using System;
+using System.IO;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -877,11 +963,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Swagger;
 using WideWorldImporters.API.Controllers;
 using WideWorldImporters.API.Models;
 
 namespace WideWorldImporters.API
 {
+#pragma warning disable CS1591
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -905,6 +993,19 @@ namespace WideWorldImporters.API
 
             // Set up dependency injection for controller's logger
             services.AddScoped<ILogger, Logger<WarehouseController>>();
+
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new Info { Title = "WideWorldImporters API", Version = "v1" });
+
+                // Get xml comments path
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+                // Set xml path
+                options.IncludeXmlComments(xmlPath);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -913,9 +1014,19 @@ namespace WideWorldImporters.API
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
 
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "WideWorldImporters API V1");
+            });
+
             app.UseMvc();
         }
     }
+#pragma warning restore CS1591
 }
 ```
 
@@ -941,12 +1052,26 @@ Before you run Web API project, add the connection string in appsettings.json fi
 }
 ```
 
+In order to show descriptions in help page, enable XML documentation for your Web API project:
+
+	1. Right click on Project > Properties
+	2. Go to Build > Output
+	3. Enable XML documentation file
+	4. Save changes
+
+![`Enable Xml Documentation File`](images/007-EnableXmlDocumentationFile.jpg)
+
 Now, press F5 to start debugging for Web API project, if everything it's OK, we'll get the following output in the browser:
 
-![Get Stock Items In Browser](images/007-GetStockItemsInBrowser.jpg)
+![`Get Stock Items In Browser`](images/007-GetStockItemsInBrowser.jpg)
+
+Also, We can load help page in ahother tab:
+
+![`Help Page`](images/008-HelpPage.jpg)
 
 ## Related Links
 
+* [`Original Post`](https://www.codeproject.com/Articles/1264219/Creating-Web-API-in-ASP-NET-Core-2-0)
 * [`Tutorials for ASP.NET Web API`](https://docs.microsoft.com/en-us/aspnet/web-api/) (Courtesy of Jennifer Cai)
 
 ## Code Improvements
