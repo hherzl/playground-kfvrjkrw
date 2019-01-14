@@ -61,6 +61,8 @@ Skills
 
 For this guide, the working directory for source code is C:\Projects.
 
+Also, [`This is the GitHub repository`](https://www.codeproject.com/Articles/1264219/Creating-Web-API-in-ASP-NET-Core-2-0) for this guide.
+
 ### Step 01 - Create Project
 
 Open Visual Studio and follow these steps:
@@ -1071,7 +1073,6 @@ Also, We can load help page in ahother tab:
 
 ## Related Links
 
-* [`Original Post`](https://www.codeproject.com/Articles/1264219/Creating-Web-API-in-ASP-NET-Core-2-0)
 * [`Tutorials for ASP.NET Web API`](https://docs.microsoft.com/en-us/aspnet/web-api/) (Courtesy of Jennifer Cai)
 
 ## Code Improvements
