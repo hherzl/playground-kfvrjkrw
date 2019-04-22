@@ -45,8 +45,7 @@ Keep these routes in mind because API must implement all routes.
 Software
 
 * .NET Core
-* NodeJS
-* Visual Studio 2017 with last update
+* Visual Studio 2017 with last update or Visual Studio 2019
 * SQL Server
 * [`WideWorldImporters`](https://www.mssqltips.com/sqlservertip/4394/download-and-install-sql-server-2016-sample-databases-wideworldimporters-and-wideworldimportersdw/) database
 
@@ -54,8 +53,8 @@ Skills
 
 * C#
 * ORM (Object Relational Mapping)
-* TDD (Test Driven Development)
 * RESTful services
+* TDD (Test Driven Development)
     
 ## Using the Code
 
