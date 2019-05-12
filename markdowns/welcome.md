@@ -13,18 +13,18 @@ REST APIs provide at least the following operations:
 * PUT
 * DELETE
 
-There are other operations for REST, but they aren't necessary for this guide.
+There are other operations for RESTful, but they aren't necessary for this guide.
 
-Those operations allow clients to perform actions through REST API, so our Web API must contain those operations.
+Those operations allow clients to perform actions through RESTful API, so our Web API must contain those operations.
 
 WideWorldImporters database contains 4 schemas:
 
-Application
-Purchasing
-Sales
-Warehouse
+    Application
+    Purchasing
+    Sales
+    Warehouse
 
-In this guide, we'll work with Warehouse.StockItems table. We'll add code to work with this entity: allow to retrieve stock items, retrieve stock item by id, create, update and delete stock items from database.
+In this guide, We'll work with *Warehouse.StockItems* table. We'll add code to work with this entity: allow to retrieve stock items, retrieve stock item by id, create, update and delete stock items from database.
 
 The version for this API is 1.
 
@@ -38,7 +38,7 @@ This is the route table for API:
 |PUT|api/v1/Warehouse/StockItem/id|Updates an existing stock item|
 |DELETE|api/v1/Warehouse/StockItem/id|Deletes an existing stock item|
 
-Keep these routes in mind because API must implement all routes.
+Keep these routes in mind because API must implement these routes.
 
 ## Prerequisites
 
@@ -58,7 +58,7 @@ Skills
     
 ## Using the Code
 
-For this guide, the working directory for source code is C:\Projects.
+For this guide, the working directory for source code is *C:\Projects*.
 
 Also, [`This is the GitHub repository`](https://www.codeproject.com/Articles/1264219/Creating-Web-API-in-ASP-NET-Core-2-0) for this guide.
 
@@ -1077,7 +1077,6 @@ Also, We can load help page in ahother tab:
 ## Code Improvements
 
 * Explain how to use command line for .NET Core
-* Add help page for Web API
 * Add Security (Authentication and authorization) for API
 * Split models definitions in files
 * Refact models outside of Web API project
@@ -1085,12 +1084,12 @@ Also, We can load help page in ahother tab:
 
 ## Points of Interest
 
-* In this article, We're working with Entity Framework Core.
-* Entity Framework Core has in memory database.
+* In this article, We're working with **Entity Framework Core**.
+* **Entity Framework Core** has in memory database.
 * We can adjust all repositories to expose specific operations, in some cases, we don't want to have GetAll, Add, Update or Delete operations.
 * Unit tests perform testing for Assemblies.
 * Integration tests perform testing for Http requests.
-* All tests have been created with xUnit framework.
+* All tests have been created with **xUnit** framework.
 
 ## History
 
