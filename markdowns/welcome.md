@@ -112,20 +112,20 @@ By default, Visual Studio adds a file with name ValuesController in Controllers 
 
 Now, create a directory with name Models and add the following files:
 
-    Entities.cs
+    Domain.cs
     Extensions.cs
     Requests.cs
     Responses.cs
 
-Entities.cs will contains all code related to Entity Framework Core.
+*Domain.cs* will contains all code related to Entity Framework Core.
 
-Extensions.cs will contain the extension methods for DbContext.
+*Extensions.cs* will contain the extension methods for DbContext.
 
-Requests.cs will contain definitions for request models.
+*Requests.cs* will contain definitions for request models.
 
-Responses.cs will contain definitions for response models.
+*Responses.cs* will contain definitions for response models.
 
-Code for Entities.cs file:
+Code for *Domain.cs* file:
 
 ```csharp
 using System;
@@ -287,7 +287,7 @@ namespace WideWorldImporters.API.Models
 }
 ```
 
-Code for Extensions.cs file:
+Code for *Extensions.cs* file:
 
 ```csharp
 using System.Linq;
@@ -343,7 +343,7 @@ namespace WideWorldImporters.API.Models
 }
 ```
 
-Code for Requests.cs file:
+Code for *Requests.cs* file:
 
 ```csharp
 using System;
@@ -470,7 +470,7 @@ namespace WideWorldImporters.API.Models
 }
 ```
 
-Code for Responses.cs file:
+Code for *Responses.cs* file:
 
 ```csharp
 using System.Collections.Generic;
@@ -605,7 +605,7 @@ namespace WideWorldImporters.API.Models
 
 Understanding Models
 
-ENTITIES
+DOMAIN
 
 StockItems class is the representation for Warehouse.StockItems table.
 
